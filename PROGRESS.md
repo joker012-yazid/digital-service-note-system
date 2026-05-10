@@ -1,10 +1,10 @@
 # Progress — Digital Service Note System
 
 ## Current Status
-- Current task: Final MVP verification
-- Completed tasks: TASK 00, TASK 01, TASK 02, TASK 03, TASK 04, TASK 05, TASK 06, TASK 07, TASK 08, TASK 09, TASK 10, TASK 11, TASK 12, TASK 13, TASK 14, final MVP documentation/verification pass
-- Next task: Runtime verification on a machine with Docker Desktop running
-- Last successful command: `Select-String -Path resources\views\home.blade.php -Pattern 'Save & Download PDF' -SimpleMatch`
+- Current task: Audit Critical Gap 1 - Docker runtime verification
+- Completed tasks: TASK 00, TASK 01, TASK 02, TASK 03, TASK 04, TASK 05, TASK 06, TASK 07, TASK 08, TASK 09, TASK 10, TASK 11, TASK 12, TASK 13, TASK 14
+- Next task: Critical Gap 2 - local Laravel runtime commands cannot be verified because local PHP/Composer are not installed.
+- Last successful command: `npm run build`
 - Known errors:
   - `git status --short` failed because this folder is not a Git repository.
   - `pdftotext` is not installed.
@@ -24,10 +24,35 @@
   - TASK 12 runtime delete/soft-delete database behavior could not be tested because PHP is not installed locally and Docker daemon is unavailable.
   - TASK 13 Composer package install and runtime PDF generation could not be tested because Composer/PHP are not installed locally and Docker daemon is unavailable.
   - Final MVP runtime tests could not be executed because PHP/Composer are not installed locally and the Docker Desktop Linux engine is not active.
+  - Resolved 2026-05-10 22:19:37 +08:00: Docker Desktop/Linux engine is now running and Docker-based runtime verification passes.
 - Known limitations:
-  - Docker files are present and `docker compose config` validates, but containers were not started because Docker daemon is unavailable.
-  - PHP and Composer are not installed locally; Laravel dependencies will be installed inside the app container when Docker is running.
+  - Docker runtime is now verified through Docker Compose.
+  - PHP and Composer are not installed locally; use Docker-based commands until local tooling is installed.
   - PDF reference was inspected visually from extracted embedded image, not via selectable text.
+
+## Audit Critical Gap 1 - Docker Runtime Verification
+- Date/time: 2026-05-10 22:19:37 +08:00
+- Gap fixed:
+  - Docker runtime could not be verified because Docker Desktop Linux engine was not running.
+- Summary:
+  - Started Docker Desktop and confirmed the Docker Linux engine is available.
+  - Updated Docker app sessions to use the file driver for the no-login MVP.
+  - Updated the Docker entrypoint so an existing generated `.env` is normalized to `SESSION_DRIVER=file`.
+  - Fixed runtime 500s by making validation error output tolerate a missing error bag in middleware-disabled tests.
+  - Added defensive service note route-model resolution for tests that disable middleware.
+  - Rebuilt and restarted the app container successfully.
+- Test result:
+  - `docker compose config --quiet` passed.
+  - `docker compose up -d --build app` passed.
+  - `docker compose ps` shows the app up and database healthy.
+  - `docker compose exec app php artisan migrate:status` shows all migrations ran.
+  - `docker compose exec app php artisan route:list` passed and showed no login/dashboard routes.
+  - `Invoke-WebRequest -Uri http://localhost:8000 -UseBasicParsing -TimeoutSec 30` returned HTTP 200.
+  - `docker compose exec app php artisan test` passed: 6 tests, 41 assertions.
+  - `npm run build` passed.
+- Remaining:
+  - Local PHP/Composer are still not installed, so the next Critical Gap remains open.
+  - Full manual Docker restart persistence testing remains a separate high-priority gap.
 
 ## Final MVP Verification
 - Date/time: 2026-05-10 21:31:24 +08:00
@@ -922,6 +947,51 @@
 - Notes:
   - Once Docker is running, validate with `docker compose up -d --build`, then `docker compose exec app composer install`, `docker compose exec app php artisan migrate:fresh --seed`, and open `/service-notes/1/pdf`.
   - Next task should implement print and download PDF buttons.
+
+### TASK 14 — Print and Download PDF Buttons
+- Date/time: 2026-05-10 21:41:51 +08:00
+- Summary:
+  - Re-read `PROGRESS.md` and `TASKS.md`.
+  - Inspected the TASK 14 PDF route/controller and existing record action buttons.
+  - Confirmed search results include `Print PDF` and `Download PDF` links for each service note.
+  - Confirmed service note detail page includes `Print PDF` and `Download PDF` links.
+  - Confirmed `ServiceNoteController@pdf` uses filename format `service-note-{service_no}-{customer_name}.pdf`.
+  - Confirmed `?print=1` streams the PDF and logs action `printed`.
+  - Confirmed the normal PDF URL downloads the PDF and logs action `downloaded`.
+  - Rebuilt frontend assets with Vite/Tailwind.
+- Files created:
+  - None.
+- Files changed:
+  - `app/Http/Controllers/ServiceNoteController.php`
+  - `resources/views/home.blade.php`
+  - `resources/views/service-notes/show.blade.php`
+  - `public/build/manifest.json`
+  - `public/build/assets/*`
+  - `TASKS.md`
+  - `PROGRESS.md`
+- Commands run:
+  - `Get-Content PROGRESS.md`
+  - `Get-Content TASKS.md`
+  - `git status --short`
+  - `Select-String -Path app\Http\Controllers\ServiceNoteController.php -Pattern "public function pdf|Str::slug|request\(\)->has\('print'\)|->stream\(|->download\(|'action' => 'printed'|'action' => 'downloaded'" -Context 2,2`
+  - `Select-String -Path resources\views\home.blade.php,resources\views\service-notes\show.blade.php -Pattern "Print PDF|Download PDF|service-notes/.+pdf|pdf\?print=1" -Context 1,1`
+  - `Select-String -Path routes\web.php -Pattern "service-notes.*pdf|service-notes.pdf" -Context 1,1`
+  - `Select-String -Path TASKS.md -Pattern "TASK 14" -Context 0,12`
+  - `npm run build`
+  - `docker compose config --quiet`
+  - `php -v`
+  - `Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'`
+- Test result:
+  - `npm run build` passed and generated updated Vite/Tailwind assets.
+  - `docker compose config --quiet` passed.
+  - Static inspection confirmed PDF print/download links are present on search results and detail page.
+  - Static inspection confirmed print streams the PDF and download returns a download response.
+  - Static inspection confirmed printed/downloaded log actions are created.
+  - `php -v` failed because PHP is not installed locally.
+  - Runtime PDF print/download behavior was not tested because PHP is unavailable locally and Docker Desktop Linux engine / Docker daemon is not running.
+- Notes:
+  - Once Docker is running, validate with `docker compose exec app php artisan migrate:fresh --seed`, open `/service-notes/1`, then click `Print PDF` and `Download PDF`.
+  - Next task should implement the company settings page.
 
 ## Resume Instructions
 To continue, tell Codex:

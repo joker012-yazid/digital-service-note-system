@@ -3,6 +3,7 @@
 @php
     $customer = $serviceNote->customer;
     $device = $serviceNote->device;
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
 @endphp
 
 @section('content')

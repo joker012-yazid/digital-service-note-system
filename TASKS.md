@@ -305,6 +305,9 @@ Deliverables:
 - Working PDF download.
 - Print-friendly route/view.
 
+Status:
+- Completed with environment limitation: search results and service note detail expose Print PDF and Download PDF actions. The PDF controller uses filename `service-note-{service_no}-{customer_name}.pdf`, streams print requests with `?print=1`, downloads normal PDF requests, and logs `printed` / `downloaded` actions. Frontend assets build successfully and Docker Compose configuration validates. Runtime PDF print/download behavior could not be tested because PHP is not installed locally and Docker Desktop Linux engine / Docker daemon is not running.
+
 Stop after this task.
 
 ## TASK 15 — Company Settings Page

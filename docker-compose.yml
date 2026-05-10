@@ -21,6 +21,7 @@ services:
       DB_DATABASE: digital_service_note
       DB_USERNAME: service_note
       DB_PASSWORD: service_note_password
+      SESSION_DRIVER: file
     depends_on:
       database:
         condition: service_healthy

@@ -5,6 +5,7 @@
     $device = $serviceNote->device;
 
     $displayValue = static fn ($value, $fallback = '-') => filled($value) ? $value : $fallback;
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
 @endphp
 
 @section('content')

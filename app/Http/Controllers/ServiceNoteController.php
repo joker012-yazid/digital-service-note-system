@@ -93,6 +93,7 @@ class ServiceNoteController extends Controller
 
     public function show(ServiceNote $serviceNote): View
     {
+        $serviceNote = $this->resolveRouteServiceNote($serviceNote);
         $serviceNote->load(['customer', 'device']);
 
         return view('service-notes.show', compact('serviceNote'));
@@ -100,6 +101,7 @@ class ServiceNoteController extends Controller
 
     public function edit(ServiceNote $serviceNote): View
     {
+        $serviceNote = $this->resolveRouteServiceNote($serviceNote);
         $serviceNote->load(['customer', 'device']);
 
         $statuses = ServiceNote::STATUSES;
@@ -188,6 +190,7 @@ class ServiceNoteController extends Controller
 
     public function update(Request $request, ServiceNote $serviceNote): RedirectResponse
     {
+        $serviceNote = $this->resolveRouteServiceNote($serviceNote);
         $validated = $request->validate($this->serviceNoteRules());
 
         $serviceCharge = round((float) ($validated['service_charge'] ?? 0), 2);
@@ -271,6 +274,7 @@ class ServiceNoteController extends Controller
 
     public function destroy(Request $request, ServiceNote $serviceNote): RedirectResponse
     {
+        $serviceNote = $this->resolveRouteServiceNote($serviceNote);
         $request->validate([
             'delete_confirmation' => ['required', 'string', Rule::in([$serviceNote->service_no])],
         ], [
@@ -293,6 +297,7 @@ class ServiceNoteController extends Controller
 
     public function pdf(ServiceNote $serviceNote)
     {
+        $serviceNote = $this->resolveRouteServiceNote($serviceNote);
         $serviceNote->load(['customer', 'device']);
 
         $settings = Setting::query()
@@ -358,6 +363,15 @@ class ServiceNoteController extends Controller
             'warranty_unit' => ['nullable', Rule::in(['Hari', 'Bulan'])],
             'warranty_note' => ['nullable', 'string'],
         ];
+    }
+
+    private function resolveRouteServiceNote(ServiceNote $serviceNote): ServiceNote
+    {
+        if ($serviceNote->exists) {
+            return $serviceNote;
+        }
+
+        return ServiceNote::query()->findOrFail(request()->route('serviceNote'));
     }
 
 }

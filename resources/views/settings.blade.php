@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
+@endphp
+
 @section('content')
 <div class="mx-auto max-w-3xl">
     <div class="mb-6">

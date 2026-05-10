@@ -20,6 +20,8 @@
         'received_from' => '',
         'received_to' => '',
     ];
+
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
 @endphp
 
 @section('content')
