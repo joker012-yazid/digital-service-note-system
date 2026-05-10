@@ -13,4 +13,7 @@ if ! grep -q '^APP_KEY=base64:' .env; then
     php artisan key:generate --ansi --force
 fi
 
+php artisan migrate --force
+php artisan db:seed --class=DefaultSettingsSeeder --force
+
 exec php artisan serve --host=0.0.0.0 --port=8000

@@ -221,9 +221,7 @@
                 <div class="sticky bottom-0 border-t border-slate-200 bg-white p-4">
                     <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                         <button type="submit" name="action" value="save" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Save Service Note</button>
-                        <button type="submit" name="action" value="save_pdf" class="rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-400">Save & Generate PDF</button>
-                        <button type="button" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print PDF</button>
-                        <button type="button" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Download PDF</button>
+                        <button type="submit" name="action" value="save_pdf" class="rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-400">Save & Download PDF</button>
                         <button type="reset" class="rounded-md border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50">Clear Form / New Form</button>
                     </div>
                 </div>

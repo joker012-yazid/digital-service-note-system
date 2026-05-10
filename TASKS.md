@@ -18,7 +18,7 @@ Project will be built task by task. Complete one task, update `PROGRESS.md`, upd
 - [x] TASK 11 — Edit and Update Service Note
 - [x] TASK 12 — Delete Service Note with Confirmation
 - [x] TASK 13 — PDF Template and PDF Generation
-- [ ] TASK 14 — Print and Download PDF Buttons
+- [x] TASK 14 — Print and Download PDF Buttons
 - [ ] TASK 15 — Company Settings Page
 - [ ] TASK 16 — Customer and Device History
 - [ ] TASK 17 — Audit Log

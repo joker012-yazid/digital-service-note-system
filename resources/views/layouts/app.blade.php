@@ -41,7 +41,6 @@
                     <a href="{{ url('/') }}" class="rounded-md px-3 py-2 hover:bg-slate-100">Main Form</a>
                     <a href="{{ url('/#search-records') }}" class="rounded-md px-3 py-2 hover:bg-slate-100">Search Records</a>
                     <a href="{{ url('/settings') }}" class="rounded-md px-3 py-2 hover:bg-slate-100">Settings</a>
-                    <a href="{{ url('/backup-guide') }}" class="rounded-md px-3 py-2 hover:bg-slate-100">Backup Guide</a>
                 </nav>
             </div>
         </header>

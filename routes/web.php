@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ServiceNoteController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ServiceNoteController::class, 'index'])->name('home');
@@ -11,3 +12,5 @@ Route::put('/service-notes/{serviceNote}', [ServiceNoteController::class, 'updat
 Route::delete('/service-notes/{serviceNote}', [ServiceNoteController::class, 'destroy'])->name('service-notes.destroy');
 Route::get('/service-notes/{serviceNote}/pdf', [ServiceNoteController::class, 'pdf'])->name('service-notes.pdf');
 Route::get('/service-notes/{serviceNote}', [ServiceNoteController::class, 'show'])->name('service-notes.show');
+Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');

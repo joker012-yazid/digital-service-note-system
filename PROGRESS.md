@@ -1,10 +1,10 @@
 # Progress — Digital Service Note System
 
 ## Current Status
-- Current task: TASK 13 — PDF Template and PDF Generation
-- Completed tasks: TASK 00, TASK 01, TASK 02, TASK 03, TASK 04, TASK 05, TASK 06, TASK 07, TASK 08, TASK 09, TASK 10, TASK 11, TASK 12, TASK 13
-- Next task: TASK 14 — Print and Download PDF Buttons
-- Last successful command: `Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'`
+- Current task: Final MVP verification
+- Completed tasks: TASK 00, TASK 01, TASK 02, TASK 03, TASK 04, TASK 05, TASK 06, TASK 07, TASK 08, TASK 09, TASK 10, TASK 11, TASK 12, TASK 13, TASK 14, final MVP documentation/verification pass
+- Next task: Runtime verification on a machine with Docker Desktop running
+- Last successful command: `Select-String -Path resources\views\home.blade.php -Pattern 'Save & Download PDF' -SimpleMatch`
 - Known errors:
   - `git status --short` failed because this folder is not a Git repository.
   - `pdftotext` is not installed.
@@ -23,10 +23,57 @@
   - TASK 11 runtime edit/update database behavior could not be tested because PHP is not installed locally and Docker daemon is unavailable.
   - TASK 12 runtime delete/soft-delete database behavior could not be tested because PHP is not installed locally and Docker daemon is unavailable.
   - TASK 13 Composer package install and runtime PDF generation could not be tested because Composer/PHP are not installed locally and Docker daemon is unavailable.
+  - Final MVP runtime tests could not be executed because PHP/Composer are not installed locally and the Docker Desktop Linux engine is not active.
 - Known limitations:
   - Docker files are present and `docker compose config` validates, but containers were not started because Docker daemon is unavailable.
   - PHP and Composer are not installed locally; Laravel dependencies will be installed inside the app container when Docker is running.
   - PDF reference was inspected visually from extracted embedded image, not via selectable text.
+
+## Final MVP Verification
+- Date/time: 2026-05-10 21:31:24 +08:00
+- Summary:
+  - Verified routes and views statically against the MVP checklist.
+  - Fixed `SettingsController` parse error and duplicate update block.
+  - Added the missing `SettingsController` import in `routes/web.php`.
+  - Removed broken `/backup-guide` navigation link.
+  - Updated Docker Compose to wait for a healthy MariaDB service.
+  - Updated Docker entrypoint to run migrations and seed default company settings on startup.
+  - Added focused feature tests for home/search, no login/dashboard, create/save, service number format, detail, edit, PDF response, hidden device password in PDF HTML, and settings in PDF.
+  - Wired the create form `save_pdf` action to redirect to generated PDF download and removed dead pre-save PDF buttons.
+  - Rebuilt Vite/Tailwind assets successfully.
+  - Rewrote `README.md` with install, usage, Docker, backup, and restore instructions.
+- Requirement status:
+  - No login page exists: static route/view scan passed.
+  - No dashboard page exists: static route/view scan passed.
+  - `/` opens Service Note Form + Search directly: route points to `ServiceNoteController@index`, and home view contains both sections.
+  - Create/save/search/detail/edit/PDF/settings paths are implemented and covered by `tests/Feature/ServiceNoteMvpTest.php`.
+  - Device password is excluded from `resources/views/service-notes/pdf.blade.php`.
+  - Docker Compose validates and uses persistent `database_data` volume.
+  - Docker runtime persistence could not be tested locally because Docker daemon is unavailable.
+- Commands run:
+  - `Get-ChildItem -Force`
+  - `rg --files`
+  - `git status --short`
+  - Multiple `Get-Content` inspections across routes, controllers, models, migrations, views, Docker files, README, and progress docs.
+  - `php -v`
+  - `composer --version`
+  - `docker version`
+  - `docker compose config`
+  - `rg -n "Route::get\('/login|Route::view\('/login|login\.blade|Route::get\('/dashboard|Route::view\('/dashboard|dashboard\.blade|Dashboard" routes resources app tests`
+  - `rg -n "device_password|Password Peranti|secret-password" resources\views\service-notes\pdf.blade.php resources\views tests\Feature\ServiceNoteMvpTest.php`
+  - `npm run build`
+  - `Select-String -Path resources\views\home.blade.php -Pattern 'Save & Generate PDF','Print PDF</button>','Download PDF</button>' -SimpleMatch`
+  - `Select-String -Path resources\views\home.blade.php -Pattern 'Save & Download PDF' -SimpleMatch`
+- Test result:
+  - `npm run build` passed.
+  - `docker compose config` passed.
+  - Create form now shows `Save & Download PDF` and no longer includes the pre-save `Print PDF`/`Download PDF` buttons.
+  - Static scan found no login route/view and no dashboard route/view.
+  - Static scan found no `device_password` reference in the PDF template.
+  - `php -v` failed because PHP is not installed locally.
+  - `composer --version` failed because Composer is not installed locally.
+  - `docker version` could not connect to Docker Desktop Linux engine.
+  - `php artisan test` and browser/runtime verification were not run due to local environment limitations.
 
 ## Completed Work
 

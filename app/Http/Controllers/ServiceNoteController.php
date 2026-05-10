@@ -176,6 +176,10 @@ class ServiceNoteController extends Controller
             return $serviceNote;
         });
 
+        if ($request->input('action') === 'save_pdf') {
+            return redirect()->route('service-notes.pdf', $serviceNote);
+        }
+
         return redirect()
             ->route('home')
             ->with('success', "Service note {$serviceNote->service_no} berjaya disimpan.")
@@ -301,12 +305,26 @@ class ServiceNoteController extends Controller
             . Str::slug($serviceNote->customer?->name ?? 'customer')
             . '.pdf';
 
-        return Pdf::loadView('service-notes.pdf', [
+        $pdf = Pdf::loadView('service-notes.pdf', [
             'serviceNote' => $serviceNote,
             'settings' => $settings,
-        ])
-            ->setPaper('a4', 'portrait')
-            ->stream($fileName);
+        ])->setPaper('a4', 'portrait');
+
+        // Log the action before returning response.
+        if (request()->has('print')) {
+            $serviceNote->logs()->create([
+                'action' => 'printed',
+                'description' => "Service note {$serviceNote->service_no} PDF printed",
+            ]);
+            return $pdf->stream($fileName);
+        }
+
+        $serviceNote->logs()->create([
+            'action' => 'downloaded',
+            'description' => "Service note {$serviceNote->service_no} PDF downloaded",
+        ]);
+
+        return $pdf->download($fileName);
     }
 
     private function deviceTypes(): array

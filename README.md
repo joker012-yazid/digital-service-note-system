@@ -1,55 +1,63 @@
 # Digital Service Note System
 
-Digital Service Note System is a Laravel-based MVP for a computer repair shop service note workflow. Staff will use it to create service notes, save customer/device/service data, search old records, and later generate printable PDF service reports.
+Laravel MVP for a repair shop service note workflow. The app opens directly to the service note form and search screen. There is no login page and no dashboard in the MVP.
 
-Current implementation status:
-- Laravel base application is installed.
-- Docker Compose app and MariaDB services are configured.
-- Database environment defaults are configured for Docker.
-- Product features such as service note form, migrations, search, PDF, settings, and backup guide will be added in later tasks.
+## Features
+
+- Create service notes from `/`
+- Save customer, device, and service note data
+- Auto-generate service numbers using `SN-YYYY-0001`
+- Search old records by service number, customer, phone, email, model, serial number, status, device type, and received date
+- View and edit service note detail pages
+- Generate, download, and print PDF service reports
+- Hide device password from the PDF
+- Manage company settings used in PDFs
+- Run with Docker Compose and persistent MariaDB storage
 
 ## Requirements
 
-For Docker-based development:
 - Docker Desktop or Docker Engine
 - Docker Compose v2
 
-Local PHP and Composer are optional. The app container installs PHP dependencies when Docker is running.
+Local PHP and Composer are optional. The app container installs Composer dependencies automatically.
 
-## Services
+## Install
 
-Docker Compose defines these services:
-- `app`: Laravel app container, exposed at `http://localhost:8000`
-- `database`: MariaDB database container, exposed on host port `3306`
+1. Copy the environment file if it does not exist:
 
-Persistent volumes:
-- `database_data`: MariaDB data
-- `vendor`: Composer dependencies inside the app container
-
-## Environment
-
-The default `.env.example` is configured for Docker:
-
-```env
-APP_NAME="Digital Service Note System"
-APP_URL=http://localhost:8000
-DB_CONNECTION=mariadb
-DB_HOST=database
-DB_PORT=3306
-DB_DATABASE=digital_service_note
-DB_USERNAME=service_note
-DB_PASSWORD=service_note_password
+```bash
+cp .env.example .env
 ```
 
-When the app container starts, `docker/entrypoint.sh` will:
-- install Composer dependencies if `vendor/autoload.php` is missing
-- copy `.env.example` to `.env` if `.env` does not exist
-- generate `APP_KEY` if missing
-- start Laravel on `0.0.0.0:8000`
+2. Start the app:
+
+```bash
+docker compose up -d --build
+```
+
+On first startup, `docker/entrypoint.sh` installs Composer dependencies, generates `APP_KEY`, runs migrations, seeds default company settings, and starts Laravel.
+
+3. Open the app:
+
+```text
+http://localhost:8000
+```
+
+## Usage
+
+- Main form and search: `http://localhost:8000/`
+- Settings: `http://localhost:8000/settings`
+- Detail page: click `View` from search results
+- Edit record: click `Edit` from search results or the detail page
+- Create and immediately download PDF: click `Save & Download PDF`
+- PDF download: click `Download PDF`
+- PDF print preview/stream: click `Print PDF`
+
+The device password is stored for internal use but is not displayed in the PDF.
 
 ## Docker Commands
 
-Start the app:
+Start:
 
 ```bash
 docker compose up -d --build
@@ -64,47 +72,67 @@ docker compose logs -f app
 Run Laravel commands:
 
 ```bash
-docker compose exec app php artisan about
 docker compose exec app php artisan migrate:status
+docker compose exec app php artisan test
 ```
 
-Stop containers:
+Stop without deleting data:
 
 ```bash
 docker compose down
 ```
 
-Stop containers and remove volumes:
+Restart:
 
 ```bash
-docker compose down -v
+docker compose up -d
 ```
 
-Use `down -v` only when you intentionally want to delete local database data.
+Data remains after restart because MariaDB uses the `database_data` Docker volume. Do not run `docker compose down -v` unless you intentionally want to delete database data.
 
-## Database Connection Check
+## Backup
 
-After Docker is running, use:
+Create a database backup:
 
 ```bash
-docker compose exec app php artisan migrate:status
+docker compose exec database mariadb-dump -uroot -proot_password digital_service_note > backup.sql
 ```
 
-If the command reaches MariaDB, Laravel can connect to the database. If migrations are pending, that is expected until the database tasks are completed.
+Create a timestamped backup from PowerShell:
 
-## Access
-
-Open:
-
-```text
-http://localhost:8000
+```powershell
+$stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+docker compose exec database mariadb-dump -uroot -proot_password digital_service_note > "backup-$stamp.sql"
 ```
 
-At this stage, the default Laravel welcome page may still appear. The service note homepage will be implemented in a later task.
+Keep backup files outside the project folder or copy them to external storage.
 
-## Notes
+## Restore
 
-- No login or authentication should be added for the MVP.
-- No dashboard should be added for the MVP.
-- The default route `/` will later show the service note form and search records on the same page.
-- Backup and restore documentation will be completed in TASK 18.
+Restore from a backup file:
+
+```bash
+docker compose exec -T database mariadb -uroot -proot_password digital_service_note < backup.sql
+```
+
+After restore, restart the app if needed:
+
+```bash
+docker compose restart app
+```
+
+## Verification Notes
+
+Static and build checks passed in the current environment:
+
+- `npm run build`
+- `docker compose config`
+- Static scan confirmed no login or dashboard route/view exists.
+- Static scan confirmed the PDF template does not reference `device_password`.
+
+Runtime PHP/Docker tests could not be executed on this machine because local PHP/Composer are not installed and the Docker Desktop Linux engine is not running. Once Docker is active, run:
+
+```bash
+docker compose up -d --build
+docker compose exec app php artisan test
+```
