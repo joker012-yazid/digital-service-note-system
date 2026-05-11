@@ -2,9 +2,16 @@
 
 use App\Http\Controllers\ServiceNoteController;
 use App\Http\Controllers\SettingsController;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ServiceNoteController::class, 'index'])->name('home');
+
+Route::get('/public-storage/{path}', function (string $path) {
+    abort_unless(Storage::disk('public')->exists($path), 404);
+
+    return Storage::disk('public')->response($path);
+})->where('path', '.*')->name('storage.public');
 
 Route::post('/service-notes', [ServiceNoteController::class, 'store'])->name('service-notes.store');
 Route::get('/service-notes/{serviceNote}/edit', [ServiceNoteController::class, 'edit'])->name('service-notes.edit');

@@ -194,11 +194,25 @@
                 <div class="mt-4 space-y-4">
                     <div class="rounded-md border border-dashed border-slate-300 p-4">
                         <p class="text-sm font-semibold text-slate-900">Customer Signature</p>
-                        <p class="mt-2 text-sm text-slate-600">{{ $serviceNote->customer_signature_path ? 'Uploaded' : 'Not uploaded' }}</p>
+                        @if ($serviceNote->customer_signature_path)
+                            <div class="mt-3 rounded-md border border-slate-200 bg-slate-50 p-2">
+                                <img src="{{ route('storage.public', ['path' => $serviceNote->customer_signature_path]) }}" alt="Customer signature" class="mx-auto h-20 max-w-full object-contain">
+                            </div>
+                            <p class="mt-2 text-sm font-medium text-emerald-700">Uploaded</p>
+                        @else
+                            <p class="mt-2 text-sm text-slate-600">Not uploaded</p>
+                        @endif
                     </div>
                     <div class="rounded-md border border-dashed border-slate-300 p-4">
                         <p class="text-sm font-semibold text-slate-900">Technician Signature</p>
-                        <p class="mt-2 text-sm text-slate-600">{{ $serviceNote->technician_signature_path ? 'Uploaded' : 'Not uploaded' }}</p>
+                        @if ($serviceNote->technician_signature_path)
+                            <div class="mt-3 rounded-md border border-slate-200 bg-slate-50 p-2">
+                                <img src="{{ route('storage.public', ['path' => $serviceNote->technician_signature_path]) }}" alt="Technician signature" class="mx-auto h-20 max-w-full object-contain">
+                            </div>
+                            <p class="mt-2 text-sm font-medium text-emerald-700">Uploaded</p>
+                        @else
+                            <p class="mt-2 text-sm text-slate-600">Not uploaded</p>
+                        @endif
                     </div>
                 </div>
             </section>

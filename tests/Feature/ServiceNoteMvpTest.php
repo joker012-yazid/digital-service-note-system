@@ -6,6 +6,7 @@ use App\Models\ServiceNote;
 use App\Models\Setting;
 use Database\Seeders\DefaultSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ServiceNoteMvpTest extends TestCase
@@ -73,6 +74,51 @@ class ServiceNoteMvpTest extends TestCase
         ]));
 
         $response->assertRedirect(route('service-notes.pdf', ServiceNote::query()->firstOrFail()));
+    }
+
+    public function test_service_note_can_store_and_preserve_digital_signatures(): void
+    {
+        config([
+            'filesystems.disks.public.root' => sys_get_temp_dir() . '/service-note-signature-test-' . uniqid(),
+            'filesystems.disks.public.url' => 'http://localhost/storage',
+        ]);
+        Storage::forgetDisk('public');
+
+        $this->post('/service-notes', array_merge($this->validPayload(), [
+            'customer_signature_data' => $this->signaturePngData(),
+            'technician_signature_data' => $this->signaturePngData(),
+        ]))->assertRedirect(route('home'));
+
+        $serviceNote = ServiceNote::query()->firstOrFail();
+        $signatureBasePath = 'signatures/' . strtolower($serviceNote->service_no);
+
+        $this->assertSame("{$signatureBasePath}-customer.png", $serviceNote->customer_signature_path);
+        $this->assertSame("{$signatureBasePath}-technician.png", $serviceNote->technician_signature_path);
+        $this->assertTrue(Storage::disk('public')->exists($serviceNote->customer_signature_path));
+        $this->assertTrue(Storage::disk('public')->exists($serviceNote->technician_signature_path));
+
+        $this->get(route('service-notes.show', $serviceNote))
+            ->assertOk()
+            ->assertSee($serviceNote->customer_signature_path)
+            ->assertSee($serviceNote->technician_signature_path);
+
+        $settings = Setting::query()->pluck('value', 'key')->all();
+        $html = view('service-notes.pdf', [
+            'serviceNote' => $serviceNote->load(['customer', 'device']),
+            'settings' => $settings,
+        ])->render();
+
+        $this->assertStringContainsString($serviceNote->customer_signature_path, $html);
+        $this->assertStringContainsString($serviceNote->technician_signature_path, $html);
+
+        $this->put(route('service-notes.update', $serviceNote), array_merge($this->validPayload(), [
+            'reported_issue' => 'Updated issue without new signatures',
+        ]))->assertRedirect(route('service-notes.show', $serviceNote));
+
+        $serviceNote->refresh();
+
+        $this->assertSame("{$signatureBasePath}-customer.png", $serviceNote->customer_signature_path);
+        $this->assertSame("{$signatureBasePath}-technician.png", $serviceNote->technician_signature_path);
     }
 
     public function test_detail_edit_pdf_and_settings_paths_work(): void
@@ -158,5 +204,10 @@ class ServiceNoteMvpTest extends TestCase
             'warranty_unit' => 'Hari',
             'warranty_note' => 'Warranty excludes physical damage.',
         ];
+    }
+
+    private function signaturePngData(): string
+    {
+        return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 }

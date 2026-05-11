@@ -185,6 +185,21 @@
                             <textarea id="warranty_note" name="warranty_note" rows="3" class="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">{{ old('warranty_note', $serviceNote->warranty_note) }}</textarea>
                         </div>
                     </div>
+
+                    <div class="mt-5 grid gap-4 md:grid-cols-2">
+                        @include('partials.signature-pad', [
+                            'title' => 'Customer Signature',
+                            'caption' => 'Pelanggan',
+                            'name' => 'customer_signature_data',
+                            'signaturePath' => $serviceNote->customer_signature_path,
+                        ])
+                        @include('partials.signature-pad', [
+                            'title' => 'Technician Signature',
+                            'caption' => 'Disahkan Oleh',
+                            'name' => 'technician_signature_data',
+                            'signaturePath' => $serviceNote->technician_signature_path,
+                        ])
+                    </div>
                 </fieldset>
             </div>
 

@@ -9,3 +9,196 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+@layer components {
+    .home-service-form {
+        position: relative;
+        isolation: isolate;
+        border-radius: inherit;
+    }
+
+    .home-service-form::before {
+        position: absolute;
+        inset: 0 0 auto;
+        z-index: 1;
+        height: 4px;
+        content: "";
+        background: linear-gradient(90deg, #0f172a, #f59e0b, #14b8a6, #0f172a);
+        background-size: 220% 100%;
+        border-radius: inherit;
+        animation: form-accent-flow 8s ease-in-out infinite;
+    }
+
+    .home-service-form > .space-y-6 {
+        position: relative;
+        background:
+            radial-gradient(circle at top left, rgba(245, 158, 11, 0.1), transparent 28rem),
+            radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 30rem);
+    }
+
+    .home-service-form fieldset {
+        position: relative;
+        padding: 1.1rem;
+        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.88);
+        opacity: 0;
+        transform: translateY(10px);
+        animation: form-section-in 460ms ease forwards;
+        transition:
+            background-color 180ms ease,
+            box-shadow 180ms ease,
+            transform 180ms ease;
+    }
+
+    .home-service-form fieldset.border-t {
+        border-top-color: transparent;
+    }
+
+    .home-service-form fieldset:focus-within {
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow:
+            inset 0 0 0 1px rgba(245, 158, 11, 0.42),
+            0 16px 36px rgba(15, 23, 42, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .home-service-form fieldset:nth-of-type(2) {
+        animation-delay: 70ms;
+    }
+
+    .home-service-form fieldset:nth-of-type(3) {
+        animation-delay: 140ms;
+    }
+
+    .home-service-form fieldset:nth-of-type(4) {
+        animation-delay: 210ms;
+    }
+
+    .home-service-form fieldset:nth-of-type(5) {
+        animation-delay: 280ms;
+    }
+
+    .home-service-form fieldset:nth-of-type(6) {
+        animation-delay: 350ms;
+    }
+
+    .home-service-form fieldset:nth-of-type(7) {
+        animation-delay: 420ms;
+    }
+
+    .home-service-form fieldset:nth-of-type(8) {
+        animation-delay: 490ms;
+    }
+
+    .home-service-form legend {
+        padding-right: 0.75rem;
+    }
+
+    .home-service-form label {
+        transition: color 160ms ease;
+    }
+
+    .home-service-form input,
+    .home-service-form select,
+    .home-service-form textarea {
+        transition:
+            border-color 160ms ease,
+            box-shadow 160ms ease,
+            transform 160ms ease,
+            background-color 160ms ease;
+    }
+
+    .home-service-form input:focus,
+    .home-service-form select:focus,
+    .home-service-form textarea:focus {
+        border-color: #f59e0b;
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(245, 158, 11, 0.16),
+            0 8px 18px rgba(15, 23, 42, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .home-service-form input[readonly] {
+        color: #334155;
+        cursor: not-allowed;
+        background:
+            linear-gradient(135deg, rgba(241, 245, 249, 0.98), rgba(226, 232, 240, 0.88));
+    }
+
+    .home-service-form textarea {
+        resize: vertical;
+    }
+
+    .home-service-form .sticky {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 -14px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .home-service-form button,
+    .home-service-form .sticky a {
+        transition:
+            background-color 160ms ease,
+            border-color 160ms ease,
+            box-shadow 160ms ease,
+            color 160ms ease,
+            transform 160ms ease;
+    }
+
+    .home-service-form button:hover,
+    .home-service-form .sticky a:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+    }
+
+    .signature-pad__canvas {
+        cursor: crosshair;
+        touch-action: none;
+    }
+}
+
+@keyframes form-section-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes form-accent-flow {
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-service-form::before,
+    .home-service-form fieldset {
+        animation: none;
+    }
+
+    .home-service-form fieldset {
+        opacity: 1;
+        transform: none;
+    }
+
+    .home-service-form fieldset,
+    .home-service-form input,
+    .home-service-form select,
+    .home-service-form textarea,
+    .home-service-form button,
+    .home-service-form .sticky a {
+        transition: none;
+    }
+}

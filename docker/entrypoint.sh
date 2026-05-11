@@ -20,6 +20,11 @@ if ! grep -q '^APP_KEY=base64:' .env; then
     php artisan key:generate --ansi --force
 fi
 
+if [ ! -e public/storage ] && [ ! -L public/storage ]; then
+    ln -s ../storage/app/public public/storage 2>/dev/null \
+        || echo "Storage link could not be created; Laravel public-storage fallback route will serve public files."
+fi
+
 php artisan migrate --force
 php artisan db:seed --class=DefaultSettingsSeeder --force
 

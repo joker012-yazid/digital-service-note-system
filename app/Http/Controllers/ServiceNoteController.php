@@ -11,6 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -169,6 +170,13 @@ class ServiceNoteController extends Controller
                 'technician_name' => $validated['technician_name'] ?? null,
             ]);
 
+            $signaturePaths = $this->storeSignatureImages($validated, $serviceNote);
+
+            if ($signaturePaths !== []) {
+                $serviceNote->fill($signaturePaths);
+                $serviceNote->save();
+            }
+
             $serviceNote->logs()->create([
                 'action' => 'created',
                 'description' => "Service note {$serviceNote->service_no} created"
@@ -256,6 +264,13 @@ class ServiceNoteController extends Controller
             ]);
             $serviceNote->customer()->associate($customer);
             $serviceNote->device()->associate($device);
+
+            $signaturePaths = $this->storeSignatureImages($validated, $serviceNote);
+
+            if ($signaturePaths !== []) {
+                $serviceNote->fill($signaturePaths);
+            }
+
             $serviceNote->save();
 
             $serviceNote->logs()->create([
@@ -362,7 +377,83 @@ class ServiceNoteController extends Controller
             'warranty_duration' => ['nullable', 'integer', 'min:0'],
             'warranty_unit' => ['nullable', Rule::in(['Hari', 'Bulan'])],
             'warranty_note' => ['nullable', 'string'],
+            'customer_signature_data' => ['nullable', 'string', $this->signatureDataRule()],
+            'technician_signature_data' => ['nullable', 'string', $this->signatureDataRule()],
         ];
+    }
+
+    private function signatureDataRule(): callable
+    {
+        return function (string $attribute, mixed $value, callable $fail): void {
+            if ($value === null || $value === '') {
+                return;
+            }
+
+            $prefix = 'data:image/png;base64,';
+
+            if (! is_string($value) || ! str_starts_with($value, $prefix)) {
+                $fail('Signature mesti dalam format PNG.');
+                return;
+            }
+
+            $decoded = base64_decode(substr($value, strlen($prefix)), true);
+
+            if ($decoded === false || ! str_starts_with($decoded, "\x89PNG\r\n\x1a\n")) {
+                $fail('Signature mesti dalam format PNG yang sah.');
+                return;
+            }
+
+            if (strlen($decoded) > 2 * 1024 * 1024) {
+                $fail('Saiz signature terlalu besar.');
+            }
+        };
+    }
+
+    private function storeSignatureImages(array $validated, ServiceNote $serviceNote): array
+    {
+        $paths = [];
+
+        $customerSignaturePath = $this->storeSignatureImage(
+            $validated['customer_signature_data'] ?? null,
+            $serviceNote->service_no,
+            'customer'
+        );
+
+        if ($customerSignaturePath !== null) {
+            $paths['customer_signature_path'] = $customerSignaturePath;
+        }
+
+        $technicianSignaturePath = $this->storeSignatureImage(
+            $validated['technician_signature_data'] ?? null,
+            $serviceNote->service_no,
+            'technician'
+        );
+
+        if ($technicianSignaturePath !== null) {
+            $paths['technician_signature_path'] = $technicianSignaturePath;
+        }
+
+        return $paths;
+    }
+
+    private function storeSignatureImage(?string $signatureData, string $serviceNo, string $role): ?string
+    {
+        if ($signatureData === null || $signatureData === '') {
+            return null;
+        }
+
+        $prefix = 'data:image/png;base64,';
+        $decoded = base64_decode(substr($signatureData, strlen($prefix)), true);
+
+        if ($decoded === false) {
+            return null;
+        }
+
+        $path = 'signatures/' . Str::slug($serviceNo) . "-{$role}.png";
+
+        Storage::disk('public')->put($path, $decoded);
+
+        return $path;
     }
 
     private function resolveRouteServiceNote(ServiceNote $serviceNote): ServiceNote

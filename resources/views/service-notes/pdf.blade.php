@@ -3,6 +3,15 @@
     $device = $serviceNote->device;
     $setting = static fn (string $key, string $fallback = '') => $settings[$key] ?? $fallback;
     $display = static fn ($value, string $fallback = '-') => filled($value) ? $value : $fallback;
+    $signatureFile = static function (?string $path): ?string {
+        if (! $path) {
+            return null;
+        }
+
+        $filePath = \Illuminate\Support\Facades\Storage::disk('public')->path($path);
+
+        return file_exists($filePath) ? $filePath : null;
+    };
 @endphp
 <!DOCTYPE html>
 <html lang="ms">
@@ -149,6 +158,14 @@
             text-align: center;
         }
 
+        .signature-image {
+            display: block;
+            height: 42px;
+            margin: 0 auto 4px;
+            max-width: 220px;
+            object-fit: contain;
+        }
+
         .footer {
             border-top: 1px solid #9ca3af;
             color: #4b5563;
@@ -287,10 +304,16 @@
         <tr>
             <td style="width: 50%;">
                 <span class="label">Customer Signature</span>
+                @if ($customerSignatureFile = $signatureFile($serviceNote->customer_signature_path))
+                    <img src="{{ $customerSignatureFile }}" class="signature-image" alt="Customer Signature">
+                @endif
                 <div class="signature-line">Pelanggan</div>
             </td>
             <td style="width: 50%;">
                 <span class="label">Technician Signature</span>
+                @if ($technicianSignatureFile = $signatureFile($serviceNote->technician_signature_path))
+                    <img src="{{ $technicianSignatureFile }}" class="signature-image" alt="Technician Signature">
+                @endif
                 <div class="signature-line">Disahkan Oleh</div>
             </td>
         </tr>

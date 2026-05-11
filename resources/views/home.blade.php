@@ -54,7 +54,7 @@
 
     <div class="fallback-grid grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
         <section id="service-note-form" class="fallback-panel rounded-lg border border-slate-200 bg-white shadow-sm">
-            <form action="{{ route('service-notes.store') }}" method="POST" class="service-note-form" data-service-note-form>
+            <form action="{{ route('service-notes.store') }}" method="POST" class="service-note-form home-service-form" data-service-note-form>
                 @csrf
 
                 <div class="space-y-6 p-5">
@@ -208,14 +208,16 @@
                         </div>
 
                         <div class="mt-5 grid gap-4 md:grid-cols-2">
-                            <div class="rounded-md border border-dashed border-slate-300 p-4">
-                                <p class="text-sm font-semibold text-slate-900">Customer Signature</p>
-                                <div class="mt-8 border-t border-slate-300 pt-2 text-center text-sm text-slate-600">Pelanggan</div>
-                            </div>
-                            <div class="rounded-md border border-dashed border-slate-300 p-4">
-                                <p class="text-sm font-semibold text-slate-900">Technician Signature</p>
-                                <div class="mt-8 border-t border-slate-300 pt-2 text-center text-sm text-slate-600">Disahkan Oleh</div>
-                            </div>
+                            @include('partials.signature-pad', [
+                                'title' => 'Customer Signature',
+                                'caption' => 'Pelanggan',
+                                'name' => 'customer_signature_data',
+                            ])
+                            @include('partials.signature-pad', [
+                                'title' => 'Technician Signature',
+                                'caption' => 'Disahkan Oleh',
+                                'name' => 'technician_signature_data',
+                            ])
                         </div>
                     </fieldset>
                 </div>
